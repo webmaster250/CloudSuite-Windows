@@ -1,0 +1,33 @@
+name: Build Windows Installers
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Publish Server
+        run: dotnet publish CloudServer/CloudServer.csproj -c Release -r win-x64 --self-contained true -o publish/server
+      - name: Publish Client
+        run: dotnet publish CloudClient/CloudClient.csproj -c Release -r win-x64 --self-contained true -o publish/client
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build installers
+        shell: cmd
+        run: |
+          if not exist dist mkdir dist
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\server.iss
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\client.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CloudServer-Setup
+          path: dist/CloudServer-Setup.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CloudClient-Setup
+          path: dist/CloudClient-Setup.exe
