@@ -1,38 +1,24 @@
 using System.Net;
-using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
-
 namespace CloudServer;
-internal static class Program {
- [STAThread] static void Main() {
-  ApplicationConfiguration.Initialize();
-  var app=new ServerApp();
-  Task.Run(()=>app.RunApiAsync());
-  Application.Run(app);
- }
+internal static class Program { [STAThread] static void Main(){ApplicationConfiguration.Initialize();var store=new StateStore();var app=new AdminWindow(store);Task.Run(()=>Api.Run(store));Application.Run(app);} }
+public sealed class AdminWindow:Form {
+ readonly StateStore store; readonly ListView users=new(){Dock=DockStyle.Fill,View=View.Details,FullRowSelect=true}; readonly ListView storage=new(){Dock=DockStyle.Fill,View=View.Details,FullRowSelect=true}; readonly TabControl tabs=new(){Dock=DockStyle.Fill};
+ public AdminWindow(StateStore s){store=s;Text="i-NET-PROMO Cloudservice — Serververwaltung";Width=1120;Height=720;MinimumSize=new(900,560);BackColor=Color.FromArgb(245,247,250);
+  var header=new Label{Text="  i-NET-PROMO Cloudservice",Dock=DockStyle.Top,Height=64,Font=new Font("Segoe UI",20,FontStyle.Bold),TextAlign=ContentAlignment.MiddleLeft};
+  Controls.Add(tabs);Controls.Add(header);BuildUsers();BuildStorage();}
+ void BuildUsers(){users.Columns.Add("Benutzer",220);users.Columns.Add("Name",260);users.Columns.Add("Rolle",120);users.Columns.Add("Quota",140);var p=new Panel{Dock=DockStyle.Fill};var add=new Button{Text="Benutzer hinzufügen",Dock=DockStyle.Top,Height=42};add.Click+=(s,e)=>AddUser();p.Controls.Add(users);p.Controls.Add(add);var t=new TabPage("Benutzer & Gruppen");t.Controls.Add(p);tabs.TabPages.Add(t);RefreshUsers();}
+ void BuildStorage(){storage.Columns.Add("Speicher",220);storage.Columns.Add("Pfad",420);storage.Columns.Add("Rolle",130);storage.Columns.Add("Zuweisung",180);var p=new Panel{Dock=DockStyle.Fill};var add=new Button{Text="Speicher/Ordner zuweisen",Dock=DockStyle.Top,Height=42};add.Click+=(s,e)=>AddStorage();p.Controls.Add(storage);p.Controls.Add(add);var t=new TabPage("Speicher");t.Controls.Add(p);tabs.TabPages.Add(t);RefreshStorage();}
+ void AddUser(){using var f=new Form{Text="Benutzer hinzufügen",Width=420,Height=270};var u=new TextBox{PlaceholderText="Benutzername",Dock=DockStyle.Top};var n=new TextBox{PlaceholderText="Anzeigename",Dock=DockStyle.Top};var pw=new TextBox{PlaceholderText="Passwort",UseSystemPasswordChar=true,Dock=DockStyle.Top};var ok=new Button{Text="Anlegen",Dock=DockStyle.Bottom};f.Controls.Add(pw);f.Controls.Add(n);f.Controls.Add(u);f.Controls.Add(ok);ok.Click+=(s,e)=>{if(string.IsNullOrWhiteSpace(u.Text)||string.IsNullOrWhiteSpace(pw.Text))return;store.State.Users.Add(new UserAccount{UserName=u.Text.Trim(),DisplayName=n.Text.Trim(),PasswordHash=StateStore.Hash(pw.Text)});store.Save();f.DialogResult=DialogResult.OK;};if(f.ShowDialog()==DialogResult.OK)RefreshUsers();}
+ void AddStorage(){using var d=new FolderBrowserDialog{Description="Vorhandenen Ordner auswählen. Es wird nichts formatiert oder gelöscht."};if(d.ShowDialog()!=DialogResult.OK)return;var target=store.State.Users.FirstOrDefault(x=>!x.IsAdmin);store.State.Storage.Add(new StorageAssignment{Name=Path.GetFileName(d.SelectedPath.TrimEnd(Path.DirectorySeparatorChar)),Path=d.SelectedPath,Role="Personal",UserId=target?.Id,QuotaBytes=target?.QuotaBytes??0});store.Save();RefreshStorage();}
+ void RefreshUsers(){users.Items.Clear();foreach(var u in store.State.Users){var i=new ListViewItem(u.UserName);i.SubItems.Add(u.DisplayName);i.SubItems.Add(u.IsAdmin?"Administrator":"Benutzer");i.SubItems.Add($"{u.QuotaBytes/1073741824d:N0} GB");users.Items.Add(i);}}
+ void RefreshStorage(){storage.Items.Clear();foreach(var x in store.State.Storage){var i=new ListViewItem(x.Name);i.SubItems.Add(x.Path);i.SubItems.Add(x.Role);i.SubItems.Add(store.State.Users.FirstOrDefault(u=>u.Id==x.UserId)?.UserName??"Gemeinsam");storage.Items.Add(i);}}
 }
-public sealed class ServerApp:Form {
- readonly ListBox drives=new(){Dock=DockStyle.Fill}; readonly TextBox root=new(){Dock=DockStyle.Top,PlaceholderText="Cloud-Datenordner"}; readonly Label status=new(){Dock=DockStyle.Bottom,Height=30,Text="Server bereit auf Port 5050"};
- public ServerApp(){
-  Text="Cloud Server"; Width=900; Height=600;
-  var choose=new Button{Text="Ordner auswählen",Dock=DockStyle.Top,Height=38};
-  choose.Click+=(s,e)=>{using var d=new FolderBrowserDialog();if(d.ShowDialog()==DialogResult.OK)root.Text=d.SelectedPath;};
-  Controls.Add(drives);Controls.Add(status);Controls.Add(choose);Controls.Add(root);
-  foreach(var d in DriveInfo.GetDrives().Where(x=>x.IsReady)) drives.Items.Add($"{d.Name}  {d.DriveFormat}  Frei: {d.AvailableFreeSpace/1073741824:N0} GB / {d.TotalSize/1073741824:N0} GB");
- }
- public async Task RunApiAsync(){
-  var listener=new HttpListener(); listener.Prefixes.Add("http://localhost:5050/"); listener.Start();
-  while(true){var c=await listener.GetContextAsync(); try {
-   var p=c.Request.Url?.AbsolutePath??"/";
-   if(p=="/api/health"){await Write(c,200,"application/json","{\"status\":\"ok\"}");continue;}
-   if(p=="/api/files"){
-    var baseDir=string.IsNullOrWhiteSpace(root.Text)?Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),"CloudServer","Data"):root.Text;
-    Directory.CreateDirectory(baseDir); var data=JsonSerializer.Serialize(Directory.EnumerateFileSystemEntries(baseDir).Select(x=>new {name=Path.GetFileName(x),directory=Directory.Exists(x)}));
-    await Write(c,200,"application/json",data);continue;
-   }
-   await Write(c,404,"text/plain","Not found");
-  }catch(Exception ex){await Write(c,500,"text/plain",ex.Message);}
-  }
- }
- static async Task Write(HttpListenerContext c,int code,string type,string body){var b=System.Text.Encoding.UTF8.GetBytes(body);c.Response.StatusCode=code;c.Response.ContentType=type;c.Response.ContentLength64=b.Length;await c.Response.OutputStream.WriteAsync(b);c.Response.Close();}
+public static class Api {
+ static readonly JsonSerializerOptions json=new(JsonSerializerDefaults.Web);
+ public static async Task Run(StateStore store){var l=new HttpListener();l.Prefixes.Add("http://localhost:5050/");l.Start();while(true){var c=await l.GetContextAsync();_=Task.Run(()=>Handle(c,store));}}
+ static async Task Handle(HttpListenerContext c,StateStore store){try{var p=c.Request.Url?.AbsolutePath??"/";if(p=="/api/health"){await Reply(c,200,new{status="ok",product="i-NET-PROMO Cloudservice"});return;}if(p=="/api/login"&&c.Request.HttpMethod=="POST"){var q=await JsonSerializer.DeserializeAsync<Login>(c.Request.InputStream,json);var u=store.State.Users.FirstOrDefault(x=>x.UserName.Equals(q?.UserName,StringComparison.OrdinalIgnoreCase));if(u==null||!StateStore.Verify(q?.Password??"",u.PasswordHash)){await Reply(c,401,new{error="Anmeldung fehlgeschlagen"});return;}await Reply(c,200,new{u.Id,u.UserName,u.DisplayName,u.IsAdmin,u.QuotaBytes});return;}if(p=="/api/users"){await Reply(c,200,store.State.Users.Select(u=>new{u.Id,u.UserName,u.DisplayName,u.IsAdmin,u.QuotaBytes}));return;}if(p=="/api/storage"){await Reply(c,200,store.State.Storage);return;}await Reply(c,404,new{error="Not found"});}catch(Exception e){await Reply(c,500,new{error=e.Message});}}
+ static async Task Reply(HttpListenerContext c,int status,object o){var b=Encoding.UTF8.GetBytes(JsonSerializer.Serialize(o,json));c.Response.StatusCode=status;c.Response.ContentType="application/json; charset=utf-8";c.Response.ContentLength64=b.Length;await c.Response.OutputStream.WriteAsync(b);c.Response.Close();}
+ sealed record Login(string UserName,string Password);
 }
