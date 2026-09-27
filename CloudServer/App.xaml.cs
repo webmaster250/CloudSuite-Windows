@@ -1,0 +1,1 @@
+using System.Windows; namespace CloudServer; public partial class App:Application { }
