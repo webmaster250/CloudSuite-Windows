@@ -1,4 +1,4 @@
-using System.Net; using System.Text; using System.Text.Json; using System.Windows; namespace CloudServer; internal static class Program { [STAThread] static void Main(){var store=new StateStore();Task.Run(()=>Api.Run(store));var app=new App();app.InitializeComponent();app.Run(new AdminWindow(store));} }
+using System.Net; using System.Text; using System.Text.Json; namespace CloudServer;
 public static class Api {
  static readonly JsonSerializerOptions json=new(JsonSerializerDefaults.Web);
  public static async Task Run(StateStore store){var l=new HttpListener();l.Prefixes.Add("http://localhost:5050/");l.Start();while(true){var c=await l.GetContextAsync();_=Task.Run(()=>Handle(c,store));}}
