@@ -42,6 +42,12 @@ jobs:
             if (!(Test-Path $file)) { throw "Missing installer: $file" }
             if ((Get-Item $file).Length -lt 1000000) { throw "Installer unexpectedly small: $file" }
           }
+      - name: Generate SHA256 checksums
+        shell: pwsh
+        run: |
+          $server=(Get-FileHash 'dist/i-NET-PROMO-Cloudservice-Server-Setup.exe' -Algorithm SHA256).Hash.ToLower()
+          $client=(Get-FileHash 'dist/i-NET-PROMO-Cloudservice-Client-Setup.exe' -Algorithm SHA256).Hash.ToLower()
+          @("SHA256  i-NET-PROMO-Cloudservice-Server-Setup.exe",$server,"","SHA256  i-NET-PROMO-Cloudservice-Client-Setup.exe",$client) | Set-Content -Encoding ascii 'dist/SHA256SUMS.txt'
       - uses: actions/upload-artifact@v4
         with:
           name: i-NET-PROMO-Cloudservice-Server-Setup
@@ -50,3 +56,8 @@ jobs:
         with:
           name: i-NET-PROMO-Cloudservice-Client-Setup
           path: dist/i-NET-PROMO-Cloudservice-Client-Setup.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: i-NET-PROMO-Cloudservice-1.0-Checksums
+          path: dist/SHA256SUMS.txt
