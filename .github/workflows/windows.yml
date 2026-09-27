@@ -15,6 +15,17 @@ jobs:
         run: dotnet publish CloudServer/CloudServer.csproj -c Release -r win-x64 --self-contained true -o publish/server
       - name: Publish Client
         run: dotnet publish CloudClient/CloudClient.csproj -c Release -r win-x64 --self-contained true -o publish/client
+      - name: Release smoke checks
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (!(Test-Path 'publish/server/CloudServer.exe')) { throw 'CloudServer.exe missing' }
+          if (!(Test-Path 'publish/client/CloudClient.exe')) { throw 'CloudClient.exe missing' }
+          $serverSize=(Get-Item 'publish/server/CloudServer.exe').Length
+          $clientSize=(Get-Item 'publish/client/CloudClient.exe').Length
+          if ($serverSize -lt 100000) { throw 'CloudServer.exe unexpectedly small' }
+          if ($clientSize -lt 100000) { throw 'CloudClient.exe unexpectedly small' }
+          if (!(Select-String -Path 'Directory.Build.props' -Pattern '<Version>1.0.0</Version>' -Quiet)) { throw 'Release version is not 1.0.0' }
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
       - name: Build installers
@@ -23,6 +34,14 @@ jobs:
           if not exist dist mkdir dist
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\server.iss
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\client.iss
+      - name: Verify installers
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($file in @('dist/i-NET-PROMO-Cloudservice-Server-Setup.exe','dist/i-NET-PROMO-Cloudservice-Client-Setup.exe')) {
+            if (!(Test-Path $file)) { throw "Missing installer: $file" }
+            if ((Get-Item $file).Length -lt 1000000) { throw "Installer unexpectedly small: $file" }
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: i-NET-PROMO-Cloudservice-Server-Setup
