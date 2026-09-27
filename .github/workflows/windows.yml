@@ -25,9 +25,9 @@ jobs:
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\client.iss
       - uses: actions/upload-artifact@v4
         with:
-          name: CloudServer-Setup
-          path: dist/CloudServer-Setup.exe
+          name: i-NET-PROMO-Cloudservice-Server-Setup
+          path: dist/i-NET-PROMO-Cloudservice-Server-Setup.exe
       - uses: actions/upload-artifact@v4
         with:
-          name: CloudClient-Setup
-          path: dist/CloudClient-Setup.exe
+          name: i-NET-PROMO-Cloudservice-Client-Setup
+          path: dist/i-NET-PROMO-Cloudservice-Client-Setup.exe
