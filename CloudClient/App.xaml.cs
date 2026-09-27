@@ -1,1 +1,1 @@
-using System.Windows; namespace CloudClient; public partial class App:Application { }
+namespace CloudClient; public partial class App : System.Windows.Application { protected override void OnStartup(System.Windows.StartupEventArgs e){base.OnStartup(e);new LoginWindow().Show();} }
