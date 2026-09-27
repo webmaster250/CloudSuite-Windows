@@ -1,8 +1,11 @@
 [Setup]
-AppName=Cloud Server
+AppName=i-NET-PROMO Cloudservice Server
+AppPublisher=i-NET-PROMO
+VersionInfoCompany=i-NET-PROMO
+VersionInfoDescription=i-NET-PROMO Cloudservice Server
 AppVersion=1.0.0
-DefaultDirName={autopf}\CloudServer
-DefaultGroupName=Cloud Server
+DefaultDirName={autopf}\i-NET-PROMO\Cloudservice Server
+DefaultGroupName=i-NET-PROMO Cloudservice
 OutputDir=..\dist
 OutputBaseFilename=CloudServer-Setup
 Compression=lzma2
