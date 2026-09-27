@@ -1,8 +1,11 @@
 [Setup]
-AppName=Cloud Client
+AppName=i-NET-PROMO Cloudservice Client
+AppPublisher=i-NET-PROMO
+VersionInfoCompany=i-NET-PROMO
+VersionInfoDescription=i-NET-PROMO Cloudservice Client
 AppVersion=1.0.0
-DefaultDirName={autopf}\CloudClient
-DefaultGroupName=Cloud Client
+DefaultDirName={autopf}\i-NET-PROMO\Cloudservice Client
+DefaultGroupName=i-NET-PROMO Cloudservice
 OutputDir=..\dist
 OutputBaseFilename=CloudClient-Setup
 Compression=lzma2
