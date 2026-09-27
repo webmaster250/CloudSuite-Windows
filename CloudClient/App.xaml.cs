@@ -1,1 +1,1 @@
-namespace CloudClient; public partial class App : System.Windows.Application { protected override void OnStartup(System.Windows.StartupEventArgs e){base.OnStartup(e);new LoginWindow().Show();} }
+namespace CloudClient; public partial class App : System.Windows.Application { protected override void OnStartup(System.Windows.StartupEventArgs e){base.OnStartup(e);ShutdownMode=System.Windows.ShutdownMode.OnExplicitShutdown;new LoginWindow().Show();} protected override void OnExit(System.Windows.ExitEventArgs e){base.OnExit(e);} }
