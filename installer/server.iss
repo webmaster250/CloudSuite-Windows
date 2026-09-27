@@ -22,7 +22,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 [Files]
 Source: "..\publish\server\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 [Icons]
-Name: "{group}\Cloud Server"; Filename: "{app}\CloudServer.exe"
-Name: "{autodesktop}\Cloud Server"; Filename: "{app}\CloudServer.exe"
+Name: "{group}\i-NET-PROMO Cloudservice Server"; Filename: "{app}\CloudServer.exe"
+Name: "{autodesktop}\i-NET-PROMO Cloudservice Server"; Filename: "{app}\CloudServer.exe"
 [Run]
-Filename: "{app}\CloudServer.exe"; Description: "Cloud Server starten"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\CloudServer.exe"; Description: "i-NET-PROMO Cloudservice Server starten"; Flags: nowait postinstall skipifsilent
