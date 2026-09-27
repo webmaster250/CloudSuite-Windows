@@ -1,1 +1,1 @@
-namespace CloudServer; public partial class App : System.Windows.Application { }
+namespace CloudServer; public partial class App : System.Windows.Application { protected override void OnStartup(System.Windows.StartupEventArgs e){base.OnStartup(e);var store=new StateStore();System.Threading.Tasks.Task.Run(()=>Api.Run(store));new AdminWindow(store).Show();} }
