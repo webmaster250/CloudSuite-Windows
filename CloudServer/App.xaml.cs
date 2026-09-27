@@ -1,1 +1,1 @@
-using System.Windows; namespace CloudServer; public partial class App:Application { }
+namespace CloudServer; public partial class App : System.Windows.Application { }
