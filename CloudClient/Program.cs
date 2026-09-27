@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace CloudClient;
 internal static class Program { [STAThread] static void Main(){ApplicationConfiguration.Initialize();Application.Run(new LoginWindow());}}
 static class Brand {
- public static readonly Color Navy=Color.FromArgb(18,42,66), Teal=Color.FromArgb(0,166,181), Bg=Color.FromArgb(246,248,251), Line=Color.FromArgb(225,231,238), Muted=Color.FromArgb(100,112,125);
+ public static readonly Color Navy=Color.FromArgb(20,55,91), Teal=Color.FromArgb(0,169,201), Bg=Color.FromArgb(247,249,251), Line=Color.FromArgb(225,231,238), Muted=Color.FromArgb(100,112,125);
  public static Button Button(string text,bool primary=false){var b=new Button{Text=text,AutoSize=true,Height=38,Padding=new Padding(14,0,14,0),FlatStyle=FlatStyle.Flat,Font=new Font("Segoe UI",10,FontStyle.Bold),Cursor=Cursors.Hand};b.FlatAppearance.BorderSize=primary?0:1;b.BackColor=primary?Teal:Color.White;b.ForeColor=primary?Color.White:Navy;return b;}
  public static Label Logo(int size=22)=>new(){Text="i-NET-PROMO",AutoSize=true,Font=new Font("Segoe UI",size,FontStyle.Bold),ForeColor=Navy};
 }
@@ -13,7 +13,7 @@ public sealed class LoginWindow:Form {
  public LoginWindow(){pass.UseSystemPasswordChar=true;Text="i-NET-PROMO Cloudservice";ClientSize=new(520,600);StartPosition=FormStartPosition.CenterScreen;BackColor=Brand.Bg;FormBorderStyle=FormBorderStyle.FixedSingle;MaximizeBox=false;
  var card=new Panel{Width=430,Height=500,BackColor=Color.White,Left=45,Top=45,Padding=new Padding(34)};
  var flow=new FlowLayoutPanel{Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown,WrapContents=false};
- flow.Controls.Add(Brand.Logo());flow.Controls.Add(new Label{Text="CLOUDSERVICE",AutoSize=true,ForeColor=Brand.Teal,Font=new Font("Segoe UI",10,FontStyle.Bold),Margin=new Padding(3,0,3,28)});
+ flow.Controls.Add(BrandLogo.View(360,135));flow.Controls.Add(new Label{Text="CLOUDSERVICE",AutoSize=true,ForeColor=Brand.Teal,Font=new Font("Segoe UI",10,FontStyle.Bold),Margin=new Padding(3,0,3,28)});
  flow.Controls.Add(new Label{Text="Willkommen zurück",AutoSize=true,Font=new Font("Segoe UI",18,FontStyle.Bold),ForeColor=Brand.Navy,Margin=new Padding(3,0,3,18)});
  AddField(flow,"Serveradresse",server);AddField(flow,"Benutzername",user);AddField(flow,"Passwort",pass);
  var login=Brand.Button("Anmelden",true);login.Width=360;login.Height=44;login.Margin=new Padding(3,18,3,12);flow.Controls.Add(login);flow.Controls.Add(state);card.Controls.Add(flow);Controls.Add(card);AcceptButton=login;login.Click+=async(s,e)=>await Login();}
@@ -23,7 +23,7 @@ public sealed class LoginWindow:Form {
 public sealed class MainWindow:Form {
  readonly string server,name; readonly HttpClient http=new(); readonly ListView files=new(){Dock=DockStyle.Fill,View=View.Details,FullRowSelect=true,BorderStyle=BorderStyle.None,Font=new Font("Segoe UI",10),BackColor=Color.White}; readonly Label heading=new(){AutoSize=true,Font=new Font("Segoe UI",22,FontStyle.Bold),ForeColor=Brand.Navy}; readonly Label status=new(){Dock=DockStyle.Bottom,Height=30,ForeColor=Brand.Muted,Padding=new Padding(14,6,0,0)};
  public MainWindow(string url,string displayName){server=url;name=displayName;Text="i-NET-PROMO Cloudservice";Width=1280;Height=800;MinimumSize=new(980,620);BackColor=Brand.Bg;
- var side=new Panel{Dock=DockStyle.Left,Width=238,BackColor=Color.White,Padding=new Padding(18,24,18,18)};var nav=new FlowLayoutPanel{Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown,WrapContents=false};nav.Controls.Add(Brand.Logo(18));nav.Controls.Add(new Label{Text="CLOUDSERVICE",AutoSize=true,ForeColor=Brand.Teal,Font=new Font("Segoe UI",9,FontStyle.Bold),Margin=new Padding(3,0,3,32)});
+ var side=new Panel{Dock=DockStyle.Left,Width=238,BackColor=Color.White,Padding=new Padding(18,24,18,18)};var nav=new FlowLayoutPanel{Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown,WrapContents=false};nav.Controls.Add(BrandLogo.View(196,74));nav.Controls.Add(new Label{Text="CLOUDSERVICE",AutoSize=true,ForeColor=Brand.Teal,Font=new Font("Segoe UI",9,FontStyle.Bold),Margin=new Padding(3,0,3,32)});
  foreach(var x in new[]{"☁   Meine Cloud","▣   Persönlich","▤   Projekte","↗   Mit mir geteilt","⇄   Transfer"}){var b=new Button{Text=x,Width=196,Height=44,TextAlign=ContentAlignment.MiddleLeft,FlatStyle=FlatStyle.Flat,BackColor=Color.White,ForeColor=Brand.Navy,Font=new Font("Segoe UI",10),Margin=new Padding(0,2,0,2),Cursor=Cursors.Hand};b.FlatAppearance.BorderSize=0;b.Click+=(s,e)=>heading.Text=x.Substring(4);nav.Controls.Add(b);}side.Controls.Add(nav);
  var top=new Panel{Dock=DockStyle.Top,Height=72,BackColor=Color.White,Padding=new Padding(26,17,24,12)};var account=new Label{Dock=DockStyle.Right,Width=240,Text="●  "+name+"  ▾",TextAlign=ContentAlignment.MiddleRight,Font=new Font("Segoe UI",10,FontStyle.Bold),ForeColor=Brand.Navy};var search=new TextBox{Width=360,Height=36,PlaceholderText="Dateien und Ordner durchsuchen",Font=new Font("Segoe UI",11),BorderStyle=BorderStyle.FixedSingle};top.Controls.Add(account);top.Controls.Add(search);
  var content=new Panel{Dock=DockStyle.Fill,Padding=new Padding(28,24,28,18),BackColor=Brand.Bg};var head=new Panel{Dock=DockStyle.Top,Height=72};heading.Text="Meine Cloud";heading.Location=new Point(0,4);head.Controls.Add(heading);
