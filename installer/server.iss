@@ -1,6 +1,9 @@
 [Setup]
 AppName=i-NET-PROMO Cloudservice Server
-AppPublisher=i-NET-PROMO
+AppPublisher=i-NET-PROMO / Sascha Scheuermann
+AppPublisherURL=https://www.i-net-promo.de
+AppSupportURL=https://www.i-net-promo.de
+AppUpdatesURL=https://www.i-net-promo.de
 VersionInfoCompany=i-NET-PROMO
 VersionInfoDescription=i-NET-PROMO Cloudservice Server
 AppVersion=1.0.0
@@ -10,6 +13,10 @@ OutputDir=..\dist
 OutputBaseFilename=CloudServer-Setup
 Compression=lzma2
 SolidCompression=yes
+WizardStyle=modern
+PrivilegesRequired=admin
+CloseApplications=yes
+RestartApplications=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 [Files]
